@@ -2,6 +2,8 @@ package study.stepup;
 
 import lombok.Getter;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 
 public class Account {
@@ -10,6 +12,8 @@ public class Account {
     private String name;
 
     private final HashMap<Currency, Integer> rest;
+
+    private Deque<Command> commands = new ArrayDeque<>();
 
     public Account(String name) {
         setName(name);
@@ -26,6 +30,11 @@ public class Account {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException();
         }
+        // сохраним для undo
+        String oldName = this.name;
+        // если есть что сохранять
+        if (!(oldName == null || oldName.isEmpty())) commands.push(()->{this.name = oldName;});
+        //
         this.name = name;
     }
 
@@ -37,10 +46,21 @@ public class Account {
         if (val <0) {
             throw new IllegalArgumentException();
         }
+        // сохраним для undo
+        if (rest.containsKey(cur)) {
+            Integer oldVal = rest.get(cur);
+            commands.push(()->{rest.put(cur, oldVal);});
+        }
+        else {
+            commands.push(()->{rest.remove(cur);});
+        }
+        //
         rest.put(cur, val);
     }
 
-    public void undo() {
-
+    public Account undo() {
+        if (commands.isEmpty()) throw new IllegalStateException();
+        commands.pop().perform();
+        return this;
     }
 }

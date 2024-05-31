@@ -6,5 +6,8 @@ public class Main {
         account.setRest(Currency.RUB, 100);
         account.setRest(Currency.USD, 33);
         account.print();
+
+        account.undo();
+        account.print();
     }
 }

@@ -20,4 +20,21 @@ public class AccountTest {
         assertEquals(account.getRest().get(Currency.RUB), 10);
         assertThrows(IllegalArgumentException.class, ()-> account.setRest(Currency.USD, -3));
     }
+
+    @Test
+    public void testUndo() {
+        Account account = new Account("Иван");
+        assertThrows(IllegalStateException.class, ()-> account.undo());
+
+        account.setRest(Currency.RUB, 10);
+        assertEquals(account.getName(), "Иван");
+        assertEquals(account.getRest().get(Currency.RUB), 10);
+
+        account.setRest(Currency.RUB, 333);
+        account.setName("Anonim");
+        account.undo();
+        account.undo();
+        assertEquals(account.getName(), "Иван");
+        assertEquals(account.getRest().get(Currency.RUB), 10);
+    }
 }
