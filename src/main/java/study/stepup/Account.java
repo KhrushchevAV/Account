@@ -11,7 +11,7 @@ public class Account {
     @Getter
     private String name;
 
-    private final HashMap<Currency, Integer> rest;
+    private HashMap<Currency, Integer> rest;
 
     private Deque<Command> commands = new ArrayDeque<>();
 
@@ -62,5 +62,28 @@ public class Account {
         if (commands.isEmpty()) throw new IllegalStateException();
         commands.pop().perform();
         return this;
+    }
+
+    // внутренний класс для доступа к приватным полям
+    private class Snapshot implements Loadable {
+        private String name;
+        private HashMap<Currency, Integer> rest;
+
+        // сохраняем в конструкторе
+        public Snapshot () {
+            this.name = Account.this.name;
+            this.rest = new HashMap<>(Account.this.rest);
+        }
+
+        // восстанавливаем сохраненное
+        @Override
+        public void load() {
+            Account.this.name = this.name;
+            Account.this.rest = new HashMap<>(this.rest);
+        }
+    }
+
+    public Loadable save() {
+        return new Snapshot();
     }
 }
